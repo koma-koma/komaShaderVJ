@@ -5,6 +5,7 @@ uniform float u_audio;
 
 uniform float col_depth;
 
+uniform float fract_num;
 uniform vec3 noise1;
 uniform vec3 noise2;
 
@@ -113,13 +114,19 @@ void main() {
 //    vec2 st = (gl_FragCoord.xy) / vec2(u_resolution.x, u_resolution.y);
 //    st = (st+.5); // stを0.5-1.5
     
-    float angle1 = snoise(st*noise1.x+u_time*0.1)*noise1.y;
-    vec2 pos = st * rotate2D(angle1);
+//    float angle1 = snoise(st*noise1.x+u_time*0.1)*noise1.y;
+//    vec2 pos = st * rotate2D(angle1);
+//
+//    float angle2 = snoise((st*noise2.x)+u_time)*noise2.y + noise(u_time)*noise(pos.x*1.0);//*mouse.x;
+//    pos *= rotate2D(angle2*noise2.z);
     
-    float angle2 = snoise((st*noise2.x)+u_time)*noise2.y + noise(u_time)*noise(pos.x*1.0);//*mouse.x;
-    pos *= rotate2D(angle2*noise2.z);
-    
-    
+    vec2 pos = (st);
+
+    for (float i = 0.0; i < fract_num; i++) {
+        float angle = snoise(pos*noise1.x+u_time);
+        pos *= rotate2D(angle*noise1.y + noise1.z*PI*2.0);
+    }
+
     vec3 color = abs(vec3((0.5 + pos.x*(snoise(pos*1.0 + u_time)+1.0)*col_depth) * u_color.r,
                           (0.5 + pos.y*(snoise(pos*1.0 - u_time)+1.0)*col_depth) * u_color.g,
                           u_color.b));
