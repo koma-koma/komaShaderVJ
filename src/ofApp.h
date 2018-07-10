@@ -28,7 +28,9 @@ class ofApp : public ofBaseApp{
     
     void initParameters();
     void easeParameters();
-    void randomize();
+    void randomizeBg();
+    void randomizeFg();
+    void randomizeAll();
     
     ofShader shader;
     
@@ -52,29 +54,32 @@ class ofApp : public ofBaseApp{
     ofxPanel gui_bg;
     ofParameterGroup params_bg;
     ofParameter<int> fract_num;
-    ofParameter<glm::vec3> t_noise1;
-    ofParameter<glm::vec3> t_noise2;
+    ofParameter<glm::vec2> t_stpos;
+    ofParameter<glm::vec3> t_noise_bg;
     
     ofxPanel gui_fg;
     ofParameterGroup params_fg;
+    ofParameter<glm::vec3> t_noise_fg;
     ofParameter<glm::vec2> t_scale;
     ofParameter<float> t_pow;
     ofParameter<float> t_invert;
-    ofParameter<glm::vec2> t_circleline;
     
     float timeSpeed;
     ofColor col;
     float col_depth;
-    ofVec3f noise1;
-    ofVec3f noise2;
-    ofVec2f scale;
+    glm::vec2 stpos;
+    glm::vec3 noise1;
+    glm::vec3 noise2;
+    glm::vec2 scale;
     float pow;
     float invert;
-    ofVec2f circleline;
 
     ofParameter<bool> bColorNoise;
-    ofxButton randomizeBtn;
-    
+    ofParameter<bool> bReflect;
+    ofxButton btnRandomizeBg;
+    ofxButton btnRandomizeFg;
+    ofxButton btnRandomizeAll;
+
     ofxOscReceiver receiver;
 
     

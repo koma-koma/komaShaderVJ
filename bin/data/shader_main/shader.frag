@@ -13,7 +13,9 @@ uniform vec2 scale;
 uniform float pow;
 
 uniform float invert;
-uniform vec2 cl;
+uniform vec2 stpos;
+
+uniform float bReflect;
 
 
 #define PI 3.1415926
@@ -119,25 +121,32 @@ void main() {
 //
 //    float angle2 = snoise((st*noise2.x)+u_time)*noise2.y + noise(u_time)*noise(pos.x*1.0);//*mouse.x;
 //    pos *= rotate2D(angle2*noise2.z);
+    if(bReflect == 1.0) st = -abs(st);
     
-    vec2 pos = (st);
+    vec2 pos = (st+stpos);
 
+    
     for (float i = 0.0; i < fract_num; i++) {
-        float angle = snoise(pos*noise1.x+u_time);
+        float angle = snoise(pos*noise1.x*(i+1.0)+u_time);
         pos *= rotate2D(angle*noise1.y + noise1.z*PI*2.0);
     }
+    
 
+    
     vec3 color = abs(vec3((0.5 + pos.x*(snoise(pos*1.0 + u_time)+1.0)*col_depth) * u_color.r,
                           (0.5 + pos.y*(snoise(pos*1.0 - u_time)+1.0)*col_depth) * u_color.g,
                           u_color.b));
     
-    pos *= scale;
-    st += vec2(noise(u_time*2.0), noise(u_time*2.0))*1.0;
+    st *= rotate2D(snoise(st*noise2.x+u_time)*noise2.y);
+    st *= scale;
+
     
     vec3 shape = vec3(0.0);
-    shape = vec3(min(orb(pos+snoise(pos*5.0+u_time)*0.1, .5, pow), 1.0),
-                      min(orb(pos +snoise(pos*4.0+u_time)*0.15, .5, pow), 1.0),
-                      min(orb(pos+snoise(pos*4.5+u_time)*0.2, .5, pow), 1.0));
+    shape = vec3(orb(st, 0.5, pow));
+    
+//    shape = vec3(min(orb(pos+snoise(pos*5.0+u_time)*0.1, .5, pow), 1.0),
+//                      min(orb(pos +snoise(pos*4.0+u_time)*0.15, .5, pow), 1.0),
+//                      min(orb(pos+snoise(pos*4.5+u_time)*0.2, .5, pow), 1.0));
     
 //    for (float i = 1.0; i < 10.0; i++) {
 //        vec2 add = vec2(cos(i*u_time*cl.x), sin(i*u_time*cl.y))*2.0;
@@ -145,8 +154,12 @@ void main() {
 //                      orb(pos+add+snoise(pos*4.0+u_time)*0.15, .5, pow),
 //                      orb(pos+add+snoise(pos*4.5+u_time)*0.2, .5, pow));
 //    }
-    
-    color += (invert) + (1.0-invert*2.0)*min(shape, 1.0);
+
+    if (invert > 0.0) {
+        color += invert*min(shape, 1.0);
+    } else {
+        color += -invert*(1.0-min(shape, 1.0));
+    }
     
     gl_FragColor = vec4(vec3(color), 1.0);
 }
