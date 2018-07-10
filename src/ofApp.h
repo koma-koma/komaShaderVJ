@@ -3,6 +3,9 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 #include "ofxPostGlitch.h"
+#include "ofxOsc.h"
+
+#define PORT 8000
 
 class ofApp : public ofBaseApp{
 
@@ -44,6 +47,9 @@ class ofApp : public ofBaseApp{
     ofxVec2Slider t_scale;
     ofxFloatSlider t_pow;
     
+    ofxFloatSlider t_invert;
+    ofxVec2Slider t_circleline;
+    
     float timeSpeed;
     ofColor col;
     float col_depth;
@@ -51,9 +57,13 @@ class ofApp : public ofBaseApp{
     ofVec3f noise2;
     ofVec2f scale;
     float pow;
+    float invert;
+    ofVec2f circleline;
 
     ofxToggle bParamNoise;
     ofxButton bRandom;
+    
+    ofxOscReceiver receiver;
 
     
 		

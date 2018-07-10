@@ -26,13 +26,18 @@ void ofApp::setup(){
     
     gui.add(t_scale.setup("scale", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(10.0, 10.0)));
     gui.add(t_pow.setup("pow", 1.0, 0.0, 50.0));
+    
+    gui.add(t_invert.setup("Invert Circle", 1.0, 0.0, 1.0));
+    gui.add(t_circleline.setup("circle", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(10.0, 10.0)));
 
 
     
-    // shader
+    // load shader
     shader.load("shader_main/shader.vert", "shader_main/shader.frag");
     
-    
+    // osc setup
+    receiver.setup(PORT);
+
 
 }
 
@@ -46,6 +51,7 @@ void ofApp::update(){
         time = ofGetElapsedTimef()*timeSpeed;
     }
     
+    // fbo draw
     fbo.begin();
     ofClear(0, 0, 0,255);
     ofSetColor(255, 255, 255);
@@ -59,9 +65,10 @@ void ofApp::update(){
     shader.setUniform3f("noise2", noise2.x, noise2.y, noise2.z);
     shader.setUniform2f("scale", scale.x, scale.y);
     shader.setUniform1f("pow", pow);
+    shader.setUniform1f("invert", invert);
+    shader.setUniform2f("cl", circleline.x, circleline.y);
 
 
-    
     ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
     shader.end();
     
@@ -85,22 +92,47 @@ void ofApp::update(){
     ofVec2f s = ofVec2f(t_scale->x, t_scale->y);
     scale += (s - scale)*0.1;
     pow += (t_pow - pow)*0.1;
+    
+    invert += (t_invert - invert)*0.1;
+    ofVec2f cl = ofVec2f(t_circleline->x, t_circleline->y);
+    circleline += (cl - circleline)*0.1;
 
+    // ---------------------------
 
     if (bParamNoise) {
         // パラメータをノイズで動かす
         t_col = ofColor(ofNoise(time*0.5)*255, ofNoise(time*0.7)*255, ofNoise(time*0.9)*255);
         t_col_depth = ofNoise(time);
     }
+    
+    // osc control
+    while(receiver.hasWaitingMessages()){
+        // get the next message
+        ofxOscMessage m;
+        receiver.getNextMessage(m);
+        
+        // check for mouse moved message
+        if(m.getAddress() == "/1/fader1"){
+            t_col_depth = m.getArgAsFloat(0);
+        } else if (m.getAddress() == "/1/fader2") {
+            t_noise1 = ofVec3f(m.getArgAsFloat(0)*10.0, t_noise1->y, t_noise1->z);
+        } else if (m.getAddress() == "/1/fader3") {
+            t_noise1 = ofVec3f(t_noise1->x, m.getArgAsFloat(0)*10.0,  t_noise1->z);
+        }
+    }
 }
 
 void ofApp::randomPressed() {
     t_col = ofColor(ofRandom(255), ofRandom(255), ofRandom(255));
     t_col_depth = ofRandom(1.0);
-    t_noise1 = ofVec3f(ofRandom(0, 5.0), ofRandom(0, 10), ofRandom(0, 10));
-    t_noise2 = ofVec3f(ofRandom(0, 1.0), ofRandom(0, 10), ofRandom(0, 10));
-    t_scale = ofVec2f(ofRandom(0, 10.0), ofRandom(0, 10.0));
+    t_noise1 = ofVec3f(ofRandom(0, 5.0), ofRandom(0, 5), ofRandom(0, 10));
+    t_noise2 = ofVec3f(ofRandom(0, 1.0), ofRandom(0, 5), ofRandom(0, 5));
+    t_scale = ofVec2f(ofRandom(0, 5.0), ofRandom(0, 5.0));
     t_pow = ofRandom(0, 50.0);
+    t_invert = ofRandom(1.0);
+    t_circleline = ofVec2f(ofRandom(0, 5), ofRandom(0, 5));
+
+
 }
 
 //--------------------------------------------------------------

@@ -11,6 +11,9 @@ uniform vec3 noise2;
 uniform vec2 scale;
 uniform float pow;
 
+uniform float invert;
+uniform vec2 cl;
+
 
 #define PI 3.1415926
 
@@ -124,9 +127,19 @@ void main() {
     pos *= scale;
     st += vec2(noise(u_time*2.0), noise(u_time*2.0))*1.0;
     
-    color +=  vec3(min(orb(pos+snoise(pos*5.0+u_time)*0.1, .5, pow), 1.0),
-                        min(orb(pos +snoise(pos*4.0+u_time)*0.15, .5, pow), 1.0),
-                        min(orb(pos+snoise(pos*4.5+u_time)*0.2, .5, pow), 1.0));
-
+    vec3 shape = vec3(0.0);
+    shape = vec3(min(orb(pos+snoise(pos*5.0+u_time)*0.1, .5, pow), 1.0),
+                      min(orb(pos +snoise(pos*4.0+u_time)*0.15, .5, pow), 1.0),
+                      min(orb(pos+snoise(pos*4.5+u_time)*0.2, .5, pow), 1.0));
+    
+//    for (float i = 1.0; i < 10.0; i++) {
+//        vec2 add = vec2(cos(i*u_time*cl.x), sin(i*u_time*cl.y))*2.0;
+//        shape += vec3(orb(pos+add+snoise(pos*5.0+u_time)*0.1, .5, pow),
+//                      orb(pos+add+snoise(pos*4.0+u_time)*0.15, .5, pow),
+//                      orb(pos+add+snoise(pos*4.5+u_time)*0.2, .5, pow));
+//    }
+    
+    color += (invert) + (1.0-invert*2.0)*min(shape, 1.0);
+    
     gl_FragColor = vec4(vec3(color), 1.0);
 }
