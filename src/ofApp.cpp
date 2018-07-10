@@ -26,7 +26,7 @@ void ofApp::initParameters(){
     params_control.add(bAutoLoading.set("Auto Loading", true));
     params_control.add(bTimeControl.set("Time Control", false));
     params_control.add(time.set("time", 0.0, 0.0, 1000.0));
-    params_control.add(t_timeSpeed.set("time speed", 1.0, 0.0, 2.0));
+    params_control.add(t_timeSpeed.set("time speed", 1.0, -1.0, 1.0));
     
     params_color.setName("Color");
     params_color.add(t_col.set("color", ofColor(100, 100, 140), ofColor(0, 0), ofColor(255, 255)));
@@ -63,7 +63,7 @@ void ofApp::update(){
     }
     
     if (!bTimeControl) {
-        time = ofGetElapsedTimef()*timeSpeed;
+        time += 0.1*timeSpeed;
     }
     
     // fbo draw
@@ -83,7 +83,6 @@ void ofApp::update(){
     shader.setUniform1f("pow", pow);
     shader.setUniform1f("invert", invert);
     shader.setUniform2f("cl", circleline.x, circleline.y);
-
 
     ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
     shader.end();
@@ -146,6 +145,7 @@ void ofApp::easeParameters() {
 void ofApp::randomize() {
     t_col = ofColor(ofRandom(255), ofRandom(255), ofRandom(255));
     t_col_depth = ofRandom(1.0);
+    fract_num = (int)ofRandom(1, 10);
     t_noise1 = ofVec3f(ofRandom(0, 5.0), ofRandom(0, 5), ofRandom(0, 10));
     t_noise2 = ofVec3f(ofRandom(0, 1.0), ofRandom(0, 5), ofRandom(0, 5));
     t_scale = ofVec2f(ofRandom(0, 5.0), ofRandom(0, 5.0));
