@@ -131,8 +131,6 @@ void main() {
         pos *= rotate2D(angle*noise1.y + noise1.z*PI*2.0);
     }
     
-
-    
     vec3 color = abs(vec3((0.5 + pos.x*(snoise(pos*1.0 + u_time)+1.0)*col_depth) * u_color.r,
                           (0.5 + pos.y*(snoise(pos*1.0 - u_time)+1.0)*col_depth) * u_color.g,
                           u_color.b));

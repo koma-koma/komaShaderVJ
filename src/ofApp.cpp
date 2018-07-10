@@ -64,6 +64,8 @@ void ofApp::initParameters(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    myGlitch.setFx(OFXPOSTGLITCH_VIGNETTE    , true);
+    
     if (bAutoLoading) {
         shader.load("shader_main/shader.vert", "shader_main/shader.frag");
     }
