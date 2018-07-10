@@ -75,6 +75,8 @@ class ofApp : public ofBaseApp{
     float invert;
 
     ofParameter<bool> bColorNoise;
+    ofParameter<bool> bBgNoise;
+    ofParameter<bool> bFgNoise;
     ofParameter<bool> bReflect;
     ofxButton btnRandomizeBg;
     ofxButton btnRandomizeFg;

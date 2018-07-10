@@ -40,13 +40,15 @@ void ofApp::initParameters(){
     params_bg.add(fract_num.set("fractal num", 1, 1, 10));
     params_bg.add(t_stpos.set("center pos", ofVec2f(0, 0), ofVec2f(-1.0, -1.0), ofVec2f(1.0, 1.0)));
     params_bg.add(t_noise_bg.set("noise", ofVec3f(1.0, 1.0, 1.0), ofVec3f(0, 0, 0), ofVec3f(5.0, 5.0, 1.0)));
+    params_bg.add(bBgNoise.set("Random", false));
+
     
     params_fg.setName("foreground");
     params_fg.add(t_noise_fg.set("noise", ofVec3f(1.0, 1.0, 1.0), ofVec3f(0, 0, 0), ofVec3f(10.0, 10.0, 10.0)));
     params_fg.add(t_scale.set("scale", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(10.0, 10.0)));
     params_fg.add(t_pow.set("pow", 1.0, 0.0, 50.0));
-    
     params_fg.add(t_invert.set("Invert Circle", 1.0, -1.0, 1.0));
+    params_fg.add(bFgNoise.set("Random", false));
     
     btnRandomizeBg.addListener(this, &ofApp::randomizeBg);
     btnRandomizeFg.addListener(this, &ofApp::randomizeFg);
@@ -64,7 +66,6 @@ void ofApp::initParameters(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    myGlitch.setFx(OFXPOSTGLITCH_VIGNETTE    , true);
     
     if (bAutoLoading) {
         shader.load("shader_main/shader.vert", "shader_main/shader.frag");
@@ -106,6 +107,15 @@ void ofApp::update(){
         // 色をノイズで動かす
         t_col = ofColor(ofNoise(time*0.5)*255, ofNoise(time*0.7)*255, ofNoise(time*0.9)*255);
         t_col_depth = ofNoise(time);
+    }
+    if (bBgNoise) {
+        t_noise_bg = ofVec3f(ofNoise(time*0.5)*1.0, ofNoise(time*0.6)*2.0, ofNoise(time*0.7)*2.0);
+        t_stpos = ofVec2f((ofNoise(time*0.65)-0.5)*2.0, (ofNoise(time*0.55)-0.5)*2.0);
+    }
+    if (bFgNoise) {
+        t_noise_fg = ofVec3f(ofNoise(time*0.89)*5.0, ofNoise(time*0.46)*5.0, ofNoise(time*0.64)*5.0);
+        t_scale = ofVec2f((ofNoise(time*0.65))*10.0, (1.0-ofNoise(time*0.65))*10.0);
+        t_pow = ofNoise(time*0.67+100.0)*10.0;
     }
     
     // osc control
@@ -214,6 +224,8 @@ void ofApp::keyPressed(int key){
     if (key == 't') myGlitch.setFx(OFXPOSTGLITCH_CR_BLUEINVERT    , true);
     if (key == 'y') myGlitch.setFx(OFXPOSTGLITCH_CR_REDINVERT    , true);
     if (key == 'u') myGlitch.setFx(OFXPOSTGLITCH_CR_GREENINVERT    , true);
+    if (key == 'i') myGlitch.setFx(OFXPOSTGLITCH_PIXELSORT    , true);
+    if (key == 'p') myGlitch.setFx(OFXPOSTGLITCH_VIGNETTE    , true);
 
 }
 
@@ -237,6 +249,8 @@ void ofApp::keyReleased(int key){
     if (key == 't') myGlitch.setFx(OFXPOSTGLITCH_CR_BLUEINVERT    , false);
     if (key == 'y') myGlitch.setFx(OFXPOSTGLITCH_CR_REDINVERT    , false);
     if (key == 'u') myGlitch.setFx(OFXPOSTGLITCH_CR_GREENINVERT    , false);
+    if (key == 'i') myGlitch.setFx(OFXPOSTGLITCH_PIXELSORT    , false);
+    if (key == 'p') myGlitch.setFx(OFXPOSTGLITCH_VIGNETTE    , false);
 
 }
 
