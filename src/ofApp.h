@@ -26,29 +26,41 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
-    void randomPressed();
+    void initParameters();
+    void easeParameters();
+    void randomize();
     
     ofShader shader;
     
     ofFbo fbo;
     ofxPostGlitch myGlitch;
     
+    // gui
     bool bHide;
     ofxPanel gui;
-    ofxToggle bAutoLoading;
-    ofxToggle bTimeControl;
-    ofxFloatSlider time;
-    ofxFloatSlider t_timeSpeed;
-    ofxColorSlider t_col;
-    ofxFloatSlider t_col_depth;
-    ofxVec3Slider t_noise1;
-    ofxVec3Slider t_noise2;
+    ofParameterGroup params_control;
+    ofParameter<bool> bAutoLoading;
+    ofParameter<bool> bTimeControl;
+    ofParameter<float> time;
+    ofParameter<float> t_timeSpeed;
     
-    ofxVec2Slider t_scale;
-    ofxFloatSlider t_pow;
+    ofxPanel gui_color;
+    ofParameterGroup params_color;
+    ofParameter<ofColor> t_col;
+    ofParameter<float> t_col_depth;
     
-    ofxFloatSlider t_invert;
-    ofxVec2Slider t_circleline;
+    ofxPanel gui_bg;
+    ofParameterGroup params_bg;
+    ofParameter<int> fract_num;
+    ofParameter<glm::vec3> t_noise1;
+    ofParameter<glm::vec3> t_noise2;
+    
+    ofxPanel gui_fg;
+    ofParameterGroup params_fg;
+    ofParameter<glm::vec2> t_scale;
+    ofParameter<float> t_pow;
+    ofParameter<float> t_invert;
+    ofParameter<glm::vec2> t_circleline;
     
     float timeSpeed;
     ofColor col;
@@ -60,8 +72,8 @@ class ofApp : public ofBaseApp{
     float invert;
     ofVec2f circleline;
 
-    ofxToggle bParamNoise;
-    ofxButton bRandom;
+    ofParameter<bool> bColorNoise;
+    ofxButton randomizeBtn;
     
     ofxOscReceiver receiver;
 

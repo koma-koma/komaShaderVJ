@@ -8,29 +8,7 @@ void ofApp::setup(){
     fbo.allocate(ofGetWidth(), ofGetHeight());
     myGlitch.setup(&fbo);
     
-    bRandom.addListener(this, &ofApp::randomPressed);
-    
-    // gui setup
-    bHide = true;
-    gui.setup();
-    gui.add(bAutoLoading.setup("Auto Loading", true));
-    gui.add(bTimeControl.setup("Time Control", false));
-    gui.add(time.setup("time", 0.0, 0.0, 1000.0));
-    gui.add(t_timeSpeed.setup("time speed", 1.0, 0.0, 2.0));
-    gui.add(t_col.setup("color", ofColor(100, 100, 140), ofColor(0, 0), ofColor(255, 255)));
-    gui.add(t_col_depth.setup("colpr depth", 1.0, 0.0, 2.0));
-    gui.add(t_noise1.setup("noise 1", ofVec3f(1.0, 1.0, 1.0), ofVec3f(0, 0, 0), ofVec3f(10.0, 10.0, 10.0)));
-    gui.add(t_noise2.setup("noise 2", ofVec3f(1.0, 1.0, 1.0), ofVec3f(0, 0, 0), ofVec3f(10.0, 10.0, 10.0)));
-    gui.add(bParamNoise.setup("Noise", false));
-    gui.add(bRandom.setup("Random"));
-    
-    gui.add(t_scale.setup("scale", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(10.0, 10.0)));
-    gui.add(t_pow.setup("pow", 1.0, 0.0, 50.0));
-    
-    gui.add(t_invert.setup("Invert Circle", 1.0, 0.0, 1.0));
-    gui.add(t_circleline.setup("circle", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(10.0, 10.0)));
-
-
+    initParameters();
     
     // load shader
     shader.load("shader_main/shader.vert", "shader_main/shader.frag");
@@ -40,6 +18,43 @@ void ofApp::setup(){
 
 
 }
+
+void ofApp::initParameters(){
+    // gui setup
+    bHide = true;
+    params_control.setName("controls");
+    params_control.add(bAutoLoading.set("Auto Loading", true));
+    params_control.add(bTimeControl.set("Time Control", false));
+    params_control.add(time.set("time", 0.0, 0.0, 1000.0));
+    params_control.add(t_timeSpeed.set("time speed", 1.0, 0.0, 2.0));
+    
+    params_color.setName("Color");
+    params_color.add(t_col.set("color", ofColor(100, 100, 140), ofColor(0, 0), ofColor(255, 255)));
+    params_color.add(t_col_depth.set("color depth", 1.0, 0.0, 2.0));
+    params_color.add(bColorNoise.set("Random", false));
+
+    
+    params_bg.setName("background");
+    params_bg.add(fract_num.set("fractal num", 1, 1, 10));
+    params_bg.add(t_noise1.set("noise 1", ofVec3f(1.0, 1.0, 1.0), ofVec3f(0, 0, 0), ofVec3f(5.0, 5.0, 1.0)));
+    params_bg.add(t_noise2.set("noise 2", ofVec3f(1.0, 1.0, 1.0), ofVec3f(0, 0, 0), ofVec3f(10.0, 10.0, 10.0)));
+    
+    params_fg.setName("foreground");
+    params_fg.add(t_scale.set("scale", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(10.0, 10.0)));
+    params_fg.add(t_pow.set("pow", 1.0, 0.0, 50.0));
+    
+    params_fg.add(t_invert.set("Invert Circle", 1.0, 0.0, 1.0));
+    params_fg.add(t_circleline.set("circle", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(10.0, 10.0)));
+    
+    randomizeBtn.addListener(this, &ofApp::randomize);
+    
+    gui.setup(params_control);
+    gui.add(params_color);
+    gui.add(params_bg);
+    gui.add(params_fg);
+    gui.add(randomizeBtn.setup("Randomize"));
+}
+
 
 //--------------------------------------------------------------
 void ofApp::update(){
@@ -61,6 +76,7 @@ void ofApp::update(){
     shader.setUniform2f("u_resolution", ofGetWidth(), ofGetHeight());
     shader.setUniform3f("u_color", col.r / 255.0, col.g / 255.0, col.b / 255.0);
     shader.setUniform1f("col_depth", col_depth);
+    shader.setUniform1f("fract_num", fract_num);
     shader.setUniform3f("noise1", noise1.x, noise1.y, noise1.z);
     shader.setUniform3f("noise2", noise2.x, noise2.y, noise2.z);
     shader.setUniform2f("scale", scale.x, scale.y);
@@ -74,33 +90,12 @@ void ofApp::update(){
     
     fbo.end();
     
-    // easing
-    timeSpeed += (t_timeSpeed - timeSpeed) * 0.1;
-    
-    ofColor c = t_col;
-    col.r += (c.r - col.r)*0.1;
-    col.g += (c.g - col.g)*0.1;
-    col.b += (c.b - col.b)*0.1;
-    col_depth = col_depth + (t_col_depth - col_depth)*0.1;
-    
-    ofVec3f t_n1 = ofVec3f(t_noise1->x, t_noise1->y, t_noise1->z);
-    ofVec3f t_n2 = ofVec3f(t_noise2->x, t_noise2->y, t_noise2->z);
-    
-    noise1 += (t_n1 - noise1)*0.1;
-    noise2 += (t_n2 - noise2)*0.1;
-    
-    ofVec2f s = ofVec2f(t_scale->x, t_scale->y);
-    scale += (s - scale)*0.1;
-    pow += (t_pow - pow)*0.1;
-    
-    invert += (t_invert - invert)*0.1;
-    ofVec2f cl = ofVec2f(t_circleline->x, t_circleline->y);
-    circleline += (cl - circleline)*0.1;
+    easeParameters();
 
     // ---------------------------
 
-    if (bParamNoise) {
-        // パラメータをノイズで動かす
+    if (bColorNoise) {
+        // 色をノイズで動かす
         t_col = ofColor(ofNoise(time*0.5)*255, ofNoise(time*0.7)*255, ofNoise(time*0.9)*255);
         t_col_depth = ofNoise(time);
     }
@@ -122,7 +117,33 @@ void ofApp::update(){
     }
 }
 
-void ofApp::randomPressed() {
+
+void ofApp::easeParameters() {
+    // easing
+    timeSpeed += (t_timeSpeed - timeSpeed) * 0.1;
+    
+    col.r += (t_col->r - col.r)*0.1;
+    col.g += (t_col->g - col.g)*0.1;
+    col.b += (t_col->b - col.b)*0.1;
+    col_depth = col_depth + (t_col_depth - col_depth)*0.1;
+    
+    ofVec3f t_n1 = ofVec3f(t_noise1->x, t_noise1->y, t_noise1->z);
+    ofVec3f t_n2 = ofVec3f(t_noise2->x, t_noise2->y, t_noise2->z);
+    
+    noise1 += (t_n1 - noise1)*0.1;
+    noise2 += (t_n2 - noise2)*0.1;
+    
+//    ofVec2f s = ofVec2f(t_scale->x, t_scale->y);
+    scale += (t_scale - scale)*0.1;
+    pow += (t_pow - pow)*0.1;
+    
+    invert += (t_invert - invert)*0.1;
+//    ofVec2f cl = ofVec2f(t_circleline->x, t_circleline->y);
+    circleline += (t_circleline - circleline)*0.1;
+}
+
+
+void ofApp::randomize() {
     t_col = ofColor(ofRandom(255), ofRandom(255), ofRandom(255));
     t_col_depth = ofRandom(1.0);
     t_noise1 = ofVec3f(ofRandom(0, 5.0), ofRandom(0, 5), ofRandom(0, 10));
@@ -131,8 +152,6 @@ void ofApp::randomPressed() {
     t_pow = ofRandom(0, 50.0);
     t_invert = ofRandom(1.0);
     t_circleline = ofVec2f(ofRandom(0, 5), ofRandom(0, 5));
-
-
 }
 
 //--------------------------------------------------------------
