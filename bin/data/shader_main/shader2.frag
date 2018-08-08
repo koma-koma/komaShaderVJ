@@ -48,6 +48,10 @@ float orb (vec2 st, float r, float p) {
     return pow(r / length(st), p);
 }
 
+float ring (vec2 st, float r, float s, float p) {
+    return pow(r / abs(s - length(st)), p);
+}
+
 float snoise(vec2 v) {
     
     // Precompute values for skewed triangular grid
@@ -156,49 +160,26 @@ void main() {
 //    pos *= rotate2D(angle2*noise2.z);
     if(bReflect == 1.0) st = -abs(st);
     
-    vec2 pos = (st+stpos);
-
     
-    for (float i = 0.0; i < fract_num; i++) {
-        float angle = snoise(pos*noise1.x*(i+1.0)+u_time);
-        pos *= rotate2D(angle*noise1.y + noise1.z*PI*2.0*u_audio);
-    }
+    
+
     
     vec3 color = vec3(0.0);
+    st *= rotate2D(noise1.z*PI+u_time);
     
-    vec3 rgb_color = abs(vec3((0.5 + pos.x*(snoise(pos*1.0 + u_time)+1.0)*col_depth) * u_color1.r,
-                              (0.5 + pos.y*(snoise(pos*1.0 - u_time)+1.0)*col_depth) * u_color1.g,
-                              u_color1.b));
+    float shape = 0.0;
     
-    vec3 mix_color = colMix(u_color1, u_color2, snoise(pos*1.0 + u_time));
-    
-    color = colMix(rgb_color, mix_color, col_mix);
-
-    st *= rotate2D(u_time*noise2.z);
-
-    st *= rotate2D(snoise(st*noise2.x+u_time)*noise2.y);
-    st *= scale-(u_audio)*10.0;
-
-    
-    vec3 shape = vec3(0.0);
-    shape = vec3(orb(st, 0.5, pow));
-    
-//    shape = vec3(min(orb(pos+snoise(pos*5.0+u_time)*0.1, .5, pow), 1.0),
-//                      min(orb(pos +snoise(pos*4.0+u_time)*0.15, .5, pow), 1.0),
-//                      min(orb(pos+snoise(pos*4.5+u_time)*0.2, .5, pow), 1.0));
-    
-//    for (float i = 1.0; i < 10.0; i++) {
-//        vec2 add = vec2(cos(i*u_time*cl.x), sin(i*u_time*cl.y))*2.0;
-//        shape += vec3(orb(pos+add+snoise(pos*5.0+u_time)*0.1, .5, pow),
-//                      orb(pos+add+snoise(pos*4.0+u_time)*0.15, .5, pow),
-//                      orb(pos+add+snoise(pos*4.5+u_time)*0.2, .5, pow));
-//    }
-
-    if (invert > 0.0) {
-        color += invert*min(shape, 1.0);
-    } else {
-        color += -invert*(1.0-min(shape, 1.0));
+    for (float i = 0.0; i < fract_num; i++) {
+        vec2 ist = st*rotate2D(snoise(st*noise1.x+i)*(u_audio*2.0+1.0));
+        for (float i = 0.0; i < 10.0; i++) {
+            shape += orb((ist*scale + vec2(noise(u_time*i+PI*2.0)-0.5, noise(u_time*0.8*i+PI*2.0)-0.5)*(0.5+u_audio)*noise1.y), 0.2+i*(u_audio), pow/10.0)-0.5;
+        }
     }
+    shape /= 10.0;
+
+    color += vec3(shape+snoise(st*u_color1.r),
+                  shape+snoise(st*u_color1.g),
+                  shape+snoise(st*u_color1.b));
     
     gl_FragColor = vec4(vec3(color), 1.0)*u_brightness;
 }
